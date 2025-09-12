@@ -1,0 +1,39 @@
+* {
+    outline: 1px red solid;
+}
+
+#title {
+    margin: 10px;
+    font-size: 50px;
+    font-weight: bold;
+}
+
+#reset {
+    margin: 10px;
+}
+
+#commentary {
+    margin: 10px;
+}
+
+#board {
+    margin: 10px;
+
+    display: grid;
+    gap: 10px;
+    grid-template-rows: 100px 100px 100px;
+    grid-template-columns: 100px 100px 100px;
+}
+#board .cell {
+    font-size: 70px;
+    background-color: white;
+    border: 1px solid black;
+}
+#board .cell {
+    font-size: 70px;
+    background-color: white;
+    border: 1px solid black;
+}
+#board .cell:active {
+    background-color: rgb(226, 226, 226);
+}
