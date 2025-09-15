@@ -53,7 +53,7 @@ board.printBoard();
 // game logic factory
 function GameController(player1 = "p1", player2 = "p2") {
     let board = Gameboard();
-    let gameDone = false;
+    let status = '';
     
     const players = [
         {
@@ -82,7 +82,7 @@ function GameController(player1 = "p1", player2 = "p2") {
     // defaulting to player 1's turn
     curPlayer = players[0];
 
-    const getCurPlayer = () => curPlayer;
+    const getCurPlayer = () => curPlayer.name;
 
     const switchPlayerTurn = () => {
         if(curPlayer === players[0]) {
@@ -116,69 +116,155 @@ function GameController(player1 = "p1", player2 = "p2") {
     };
 
     // a single turn
-    const playTurn = () => {
-        console.log(`It's ${curPlayer.name}'s turn!`);
-
-        let validInput = false;
-        let inputRC = '';
-        while(!validInput) {
-            inputRC = prompt(`Which row+column would you like to mark? Format like "13", which means row 1 column 3.`);
-
-            try {
-                const inputRow = parseInt(inputRC.substring(0,1)) - 1;
-                const inputCol = parseInt(inputRC.substring(1,2)) - 1;
-                const validCell = board.markCell(inputRow, inputCol, curPlayer.symbol);
-                if(validCell) {
-                    validInput = true;
-                }
-                else {
-                    console.log("Cell occupied, please try again.");
-                    continue;
-                }
-            }
-            catch(err) {
-                console.log("Invalid input, please try again.");
-                continue;
-            }
-        }
-        
-        console.log("Current board: ");
-        board.printBoard();
-        // console.log(get1DBoard());
-        console.log("===================================================================");
-
+    const playTurn = (row, col) => {
+        // update board
+        board.markCell(row, col, curPlayer.symbol);
 
         // check board for end of game scenarios
 
         // check if curPlayer has 3 in a row
         if(checkWin()) {
-            gameDone = true;
-            console.log(`${curPlayer.name} wins!`);
+            status = curPlayer.name;
+            return status;
         }
         // no playable spaces left
         if(!get1DBoard().includes('')) {
-            gameDone = true;
-            console.log("No possible moves left. Tie!");
+            status = "tie";
+            return status;
         }
 
         // swap curPlayer for preparation of next turn
         switchPlayerTurn();
-    };
 
-    // playing a full game
-    const playGame = () => {
-        // gameDone is a GameController local var defaulting to false, only set to true in playTurn under appropriate circumstances
-        while(!gameDone) {
-            // play a turn
-            playTurn();
-        }
+        // if it gets here, return a blank string, meaning no one has won yet
+        return '';
     };
 
     return {
         playTurn,
         getCurPlayer,
-        playGame
+        get1DBoard
     };
 }
 
-const game = GameController();
+
+/* DOM code starts here */
+
+// basically 
+function DisplayController() {
+    let game = GameController();
+    let gameIsOver = false;
+
+    const boardDiv = document.querySelector("#board");
+    const commentaryDiv = document.querySelector("#commentary");
+
+    // converts board array to display elements
+    const updateDisplay = () => {
+        // clear display board
+        boardDiv.textContent = '';
+
+        // remake display board based off of game.get1DBoard()
+        const cur1DBoard = game.get1DBoard();
+        for(let i = 0; i < cur1DBoard.length; i++) {
+            const curCell = document.createElement("button");
+            curCell.classList.add("cell");
+            curCell.setAttribute("id", `cell-${i+1}`);
+            curCell.textContent = cur1DBoard[i];
+
+            boardDiv.appendChild(curCell);
+        }
+
+        // initialize commentary box
+        if(commentaryDiv.textContent == '') {
+            commentaryDiv.textContent = `It's ${game.getCurPlayer()}'s turn!`;
+        }
+        
+    };
+
+    // initial display setup
+    updateDisplay();
+
+    // click event handler for board
+    boardDiv.addEventListener("click", boardClickHandler);
+
+    function boardClickHandler(event) {
+        var element = event.target;
+        let status = '';
+
+        // only do something if game is not over and cell clicked is black
+        if(!gameIsOver && element.textContent == '') {
+            switch(element.id) {
+                case "cell-1":
+                    status = game.playTurn(0, 0);
+                    break;
+                case "cell-2":
+                    status = game.playTurn(0, 1);
+                    break;
+                case "cell-3":
+                    status = game.playTurn(0, 2);
+                    break;
+                case "cell-4":
+                    status = game.playTurn(1, 0);
+                    break;
+                case "cell-5":
+                    status = game.playTurn(1, 1);
+                    break;
+                case "cell-6":
+                    status = game.playTurn(1, 2);
+                    break;
+                case "cell-7":
+                    status = game.playTurn(2, 0);
+                    break;
+                case "cell-8":
+                    status = game.playTurn(2, 1);
+                    break;
+                case "cell-9":
+                    status = game.playTurn(2, 2);
+                    break;
+                default:
+                    break;
+            }
+
+            // a move was made, so update display
+            updateDisplay();
+
+            if(status === '') {
+                // no winner yet
+                commentaryDiv.textContent = `It's ${game.getCurPlayer()}'s turn!`;
+            }
+            else if(status === "tie") {
+                // state in commentary box that its a tie
+                commentaryDiv.textContent = "It's a tie! No one wins!";
+                gameIsOver = true;
+            }
+            else {
+                // state the winner in the commentary box
+                commentaryDiv.textContent = `Game over! ${status} wins!`;
+                gameIsOver = true;
+            }
+        }
+
+    }
+
+
+    // click event handler for reset button
+    const resetBtn = document.querySelector("#reset-button");
+    resetBtn.addEventListener("click", resetClickHandler);
+
+    function resetClickHandler() {
+        // reset game object
+        game = GameController();
+
+        // reset commentary box (so it can be properly updated during updateDisplay())
+        commentaryDiv.textContent = '';
+
+        // reset display
+        updateDisplay();
+
+        // reset gameIsOver
+        gameIsOver = false;
+    }
+
+}
+
+DisplayController();
