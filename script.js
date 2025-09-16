@@ -1,4 +1,3 @@
-
 // gameboard factory
 function Gameboard() {
     let board =
@@ -150,9 +149,8 @@ function GameController(player1 = "p1", player2 = "p2") {
 
 /* DOM code starts here */
 
-// basically 
 function DisplayController() {
-    let game = GameController();
+    let game;
     let gameIsOver = false;
 
     const boardDiv = document.querySelector("#board");
@@ -181,8 +179,41 @@ function DisplayController() {
         
     };
 
-    // initial display setup
-    updateDisplay();
+
+    // click event handler for reset button
+    const resetBtn = document.querySelector("#reset-button");
+    resetBtn.addEventListener("click", resetClickHandler);
+
+    function resetClickHandler() {
+        // game object and display will be properly reset/updated in startClickHandler
+
+        // reset commentary box (so it can be properly updated for next updateDisplay())
+        commentaryDiv.textContent = '';
+        // reset gameIsOver
+        gameIsOver = false;
+        // remove display board (will be regenerated in startClickHandler)
+        boardDiv.textContent = '';
+        // reveal startDiv
+        startDiv.style.display = "block";
+    }
+
+
+    // click event handler for starting the game
+    const startDiv = document.querySelector("#start");
+    const startBtn = document.querySelector("#start-button");
+    startBtn.addEventListener("click", startClickHandler);
+
+    function startClickHandler() {
+        // get player names
+        const p1Name = startDiv.querySelector("#p1-name").value;
+        const p2Name = startDiv.querySelector("#p2-name").value;
+        // hide start div
+        startDiv.style.display = "none";
+        // start game (reset + update game object and display)
+        game = GameController(p1Name, p2Name);
+        updateDisplay();
+    }
+
 
     // click event handler for board
     boardDiv.addEventListener("click", boardClickHandler);
@@ -244,25 +275,6 @@ function DisplayController() {
             }
         }
 
-    }
-
-
-    // click event handler for reset button
-    const resetBtn = document.querySelector("#reset-button");
-    resetBtn.addEventListener("click", resetClickHandler);
-
-    function resetClickHandler() {
-        // reset game object
-        game = GameController();
-
-        // reset commentary box (so it can be properly updated during updateDisplay())
-        commentaryDiv.textContent = '';
-
-        // reset display
-        updateDisplay();
-
-        // reset gameIsOver
-        gameIsOver = false;
     }
 
 }

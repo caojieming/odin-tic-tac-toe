@@ -1,2 +1,2 @@
 # odin-tic-tac-toe
-Odin Project, Organizing Your JavaScript Code, Project 2
+A Tic-Tac-Toe webpage that makes objects using factory functions.
